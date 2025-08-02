@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PlayNet Launcher</title>
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0f0f0f;
+      font-family: Arial, sans-serif;
+    }
+    #launchBtn {
+      padding: 15px 30px;
+      font-size: 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #1e90ff;
+      color: white;
+      transition: all 0.2s;
+    }
+    #launchBtn:hover {
+      background-color: #0c6bd4;
+    }
+  </style>
+</head>
+<body>
+  <button id="launchBtn">Launch PlayNet</button>
+
+  <script>
+    // Preload assets
+    const gameURL = "https://example.com"; // YOUR WEBSITE URL
+    const splashGifURL = "https://cdn.jsdelivr.net/gh/Remoraze/logo@main/background.gif";
+    
+    // Preload the iframe content
+    const preloader = document.createElement('iframe');
+    preloader.src = gameURL;
+    preloader.style.display = 'none';
+    document.body.appendChild(preloader);
+
+    document.getElementById('launchBtn').addEventListener('click', () => {
+      const newWin = window.open("about:blank", "_blank");
+      
+      const html = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>PlayNet</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              width: 100vw;
+              height: 100vh;
+              overflow: hidden;
+              background: #000;
+            }
+            #splashContainer {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              z-index: 100;
+            }
+            #splashGif {
+              width: 100%;
+              height: 85vh;
+              object-fit: cover;
+              object-position: 100% 50%;
+            }
+            #progressContainer {
+              width: 90%;
+              max-width: 800px;
+              height: 14px;
+              background: rgba(255,255,255,0.1);
+              margin-top: 2vh;
+              overflow: hidden;
+            }
+            #progressBar {
+              height: 100%;
+              width: 0%;
+              background: linear-gradient(90deg, #666, #fff);
+              transition: width 50ms linear;
+            }
+            #gameFrame {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              border: none;
+              display: none;
+              z-index: 50;
+            }
+            .fade-out {
+              animation: fadeOut 0.3s forwards;
+            }
+            @keyframes fadeOut {
+              to { opacity: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div id="splashContainer">
+            <img id="splashGif" src="${splashGifURL}?t=${Date.now()}" alt="">
+            <div id="progressContainer">
+              <div id="progressBar"></div>
+            </div>
+          </div>
+          <iframe id="gameFrame"></iframe>
+
+          <script>
+            // Load the iframe content
+            document.getElementById('gameFrame').src = "${gameURL}";
+            
+            // Start progress animation (7.5 seconds)
+            const startTime = Date.now();
+            const duration = 7500;
+            const progressBar = document.getElementById('progressBar');
+            
+            const updateProgress = () => {
+              const elapsed = Date.now() - startTime;
+              const progress = Math.min(elapsed / duration * 100, 100);
+              progressBar.style.width = progress + '%';
+              
+              if (progress < 100) {
+                requestAnimationFrame(updateProgress);
+              } else {
+                document.getElementById('splashContainer').classList.add('fade-out');
+                document.getElementById('gameFrame').style.display = 'block';
+                setTimeout(() => {
+                  document.getElementById('splashContainer').style.display = 'none';
+                }, 300);
+              }
+            };
+            
+            // Make sure GIF only plays once
+            document.getElementById('splashGif').onload = function() {
+              this.style.objectPosition = '100% 50%';
+              updateProgress();
+            };
+          <\/script>
+        </body>
+        </html>
+      `;
+
+      newWin.document.open();
+      newWin.document.write(html);
+      newWin.document.close();
+    });
+  </script>
+</body>
+</html>
